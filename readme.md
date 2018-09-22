@@ -23,7 +23,7 @@ Result of creation in text editor:
 ### Installation
 
 ```bash
-composer require avatar4eg/flarum-ext-geotags
+composer require reflar/geotags
 ```
 
 ### Configuration
@@ -39,6 +39,4 @@ During post creation (or post editing or discussion creating) click the "Edit pl
 
 ### Links
 
-- [on github](https://github.com/avatar4eg/flarum-ext-geotags)
-- [on packagist](https://packagist.com/packages/avatar4eg/flarum-ext-geotags)
-- [issues](https://github.com/avatar4eg/flarum-ext-geotags/issues)
+- [Github](https://github.com/reflar/osm-geotags)
