@@ -1,0 +1,39 @@
+{
+    "name": "reflar/geotags",
+    "description": "Geotags for Flarum forum messages.",
+    "type": "flarum-extension",
+    "keywords": [
+        "geotag",
+        "map"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nikolai Morozov",
+            "email": "avanmorozov@gmail.com"
+        },
+
+        {
+            "name": "Charlie K",
+            "email": "Charlie.K@redevs.org"
+        }
+    ],
+    "require": {
+        "flarum/core": "^0.1.0-beta.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Reflar\\Geotags\\": "src/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "ReFlar Geotags",
+            "icon": {
+                "name": "map-marker",
+                "backgroundColor": "#263238",
+                "color": "#fff"
+            }
+        }
+    }
+}

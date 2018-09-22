@@ -1,0 +1,28 @@
+reflar-geotags:
+    admin:
+        permissions:
+            add_geotags_label: Add geotags
+        settings:
+            modal_title: Geotags Settings
+            api_label: Google Maps Api-key
+
+    forum:
+        create_modal:
+            default_title: Your Location
+            address_label: Address
+            coordinates_label: Coordinates
+            latitude_label: Latitude
+            longitude_label: Longitude
+            save_button: Save
+        view_modal:
+        list_modal:
+            geotags_title: => reflar-geotags.ref.geotags
+            geotags_add_title: Add new place
+            geotags_list_title: Existing places
+        post:
+            geotags_title: => reflar-geotags.ref.geotags
+            geotag_editor_tooltip: Edit places
+            geotag_delete_tooltip: Delete
+
+    ref:
+        geotags: Places
