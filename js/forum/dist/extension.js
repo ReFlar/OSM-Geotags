@@ -230,7 +230,7 @@ $.fn.locationPicker = function(options) {
             } else if (settings.init.address) {
                 $this.setAddress(settings.init.address)
             } else if (settings.init.location) {
-                $this.setLocation(settings.init.location.latitude, settings.init.location.longitude)
+                $this.setLocation(settings.init.location)
             }
         }
     }
@@ -769,15 +769,12 @@ System.register('reflar/geotags/extendPostData', ['flarum/extend', 'flarum/compo
 });;
 'use strict';
 
-System.register('reflar/geotags/main', ['flarum/extend', 'flarum/app', 'flarum/models/Post', 'flarum/Model', 'reflar/geotags/models/Geotag', 'reflar/geotags/addGeotagsList', 'reflar/geotags/extendPostData', 'reflar/geotags/extendEditorControls'], function (_export, _context) {
+System.register('reflar/geotags/main', ['flarum/app', 'flarum/models/Post', 'flarum/Model', 'reflar/geotags/models/Geotag', 'reflar/geotags/addGeotagsList', 'reflar/geotags/extendPostData', 'reflar/geotags/extendEditorControls'], function (_export, _context) {
     "use strict";
 
-    var extend, override, app, Post, Model, Geotag, addGeotagsList, extendPostData, extendEditorControls;
+    var app, Post, Model, Geotag, addGeotagsList, extendPostData, extendEditorControls;
     return {
-        setters: [function (_flarumExtend) {
-            extend = _flarumExtend.extend;
-            override = _flarumExtend.override;
-        }, function (_flarumApp) {
+        setters: [function (_flarumApp) {
             app = _flarumApp.default;
         }, function (_flarumModelsPost) {
             Post = _flarumModelsPost.default;
