@@ -10,7 +10,7 @@ export default class GeotagModal extends Modal {
     }
 
     title() {
-        return this.geotag.title();
+        return this.geotag.lat() + '°, ' + this.geotag.lat() + '°';
     }
 
     content() {
@@ -18,6 +18,7 @@ export default class GeotagModal extends Modal {
             m('div', {className: 'Modal-body'}, [
                 m('div', {
                     className: 'Map-field',
+                    id: 'map',
                     style: {'width': '100%', 'height': '400px'},
                     config: this.loadMap.bind(this)
                 })
@@ -26,30 +27,23 @@ export default class GeotagModal extends Modal {
     }
 
     loadMap(element) {
-        let latitude = this.geotag.lat();
-        let longitude = this.geotag.lng();
-        let coords = new google.maps.LatLng(latitude, longitude);
-        let mapOptions = {
-            zoom: 15,
-            center: coords,
-            mapTypeControl: true,
-            navigationControlOptions: {
-                style: google.maps.NavigationControlStyle.SMALL
-            },
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        let map = new google.maps.Map(
-            element, mapOptions
-        );
-        let marker = new google.maps.Marker({
-            position: coords,
-            map: map,
-            title: this.geotag.title()
-        });
+        var mapField = $(element)
 
-        $('#modal').on('shown.bs.modal', function () {
-            google.maps.event.trigger(map, 'resize');
-            map.setCenter(coords);
-        });
+        if (mapField.hasClass('olMap')) return;
+
+        var map = new OpenLayers.Map($(element).attr('id'));
+        map.addLayer(new OpenLayers.Layer.OSM());
+
+        var markers = new OpenLayers.Layer.Markers("Markers");
+        map.addLayer(markers);
+        var iconSize = new OpenLayers.Size(32, 32);
+        var markerIcon = new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h));
+
+        var latLong = new OpenLayers.LonLat(this.geotag.lng(), this.geotag.lat()).transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            map.getProjectionObject() // to Spherical Mercator Projection
+        );
+        markers.addMarker(new OpenLayers.Marker(latLong, markerIcon));
+        map.setCenter(latLong, 12);
     }
 }

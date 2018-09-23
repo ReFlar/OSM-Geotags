@@ -31,7 +31,7 @@ export default function() {
                     if (geotagsNum > 0) {
                         app.modal.show(new GeotagListModal({textAreaObj}));
                     } else {
-                        app.modal.show(new GeotagCreateModal({textAreaObj}));
+                        app.modal.show(new GeotagCreateModal({textAreaObj, 'new': false}));
                     }
                 }
             }, [

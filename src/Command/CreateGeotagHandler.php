@@ -43,7 +43,6 @@ class CreateGeotagHandler
         $geotag = (new Geotag())->forceFill([
             'user_id'       => $command->actor->id,
             'post_id'       => $command->postId ? $command->postId : 0,
-            'country'       => array_get($data, 'attributes.country'),
             'lat'           => array_get($data, 'attributes.lat'),
             'lng'           => array_get($data, 'attributes.lng'),
             'created_at'    => Carbon::now()

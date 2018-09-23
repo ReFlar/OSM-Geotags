@@ -10,8 +10,8 @@ export default class GeotagCreateModal extends Modal {
         this.mapField = null;
 
         this.geotagData = {
-            lat: m.prop(40.7128),
-            lng: m.prop(74.0060)
+            lat: m.prop(38.8977),
+            lng: m.prop(-77.0365)
         };
 
         this.geotag = app.store.createRecord('geotags');
@@ -111,9 +111,6 @@ export default class GeotagCreateModal extends Modal {
 
     updateLocation(type, value) {
         let parent = this;
-
-        console.log(value)
-        console.log(type)
         if (type === 'lng') {
             parent.geotagData.lng(value)
             parent.mapField.setLocation(parent.geotagData.lat(), value)
@@ -121,21 +118,20 @@ export default class GeotagCreateModal extends Modal {
             parent.geotagData.lat(value)
             parent.mapField.setLocation(value, parent.geotagData.lng())
         }
-        console.log(this.geotagData.lng())
     }
 
     getLocation() {
         let parent = this;
         let picker = parent.mapField;
         if('geolocation' in navigator) {
-            m.startComputation();
             navigator.geolocation.getCurrentPosition(position => {
+                m.startComputation();
                 parent.geotagData.lat(position.coords.latitude);
                 parent.geotagData.lng(position.coords.longitude);
                 picker.setLocation(position.coords.latitude, position.coords.longitude);
-            })
-            m.endComputation();
-        } 
+                m.endComputation();
+            });
+        }
     }
 
     onsubmit(e) {
@@ -143,15 +139,9 @@ export default class GeotagCreateModal extends Modal {
         if (this.loading) return;
         this.loading = true;
 
-        this.textAreaObj.insertAtCursor(markdownString);
-        if (this.textAreaObj.props.preview) {
-            this.textAreaObj.props.preview();
-        }
-
         this.geotag.pushAttributes({
             lat: this.geotagData.lat(),
-            lng: this.geotagData.lng(),
-            country: this.geotagData.country()
+            lng: this.geotagData.lng()
         });
         this.textAreaObj.geotags.push(this.geotag);
         this.loading = false;
@@ -170,9 +160,9 @@ export default class GeotagCreateModal extends Modal {
                         location: {latitude: parent.geotagData.lat(), longitude: parent.geotagData.lng()},
                     },
                     locationChanged: (currentLocation => {
-                        console.log(currentLocation.location);
                         parent.geotagData.lat(currentLocation.location.latitude !== undefined ? currentLocation.location.latitude : parent.geotagData.lat());
                         parent.geotagData.lng(currentLocation.location.longitude !== undefined ? currentLocation.location.longitude : parent.geotagData.lng());
+                        m.redraw();
                     })
                 });
             }

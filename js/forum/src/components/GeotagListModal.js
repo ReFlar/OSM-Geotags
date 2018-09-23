@@ -3,12 +3,12 @@ import Modal from 'flarum/components/Modal';
 import Button from 'flarum/components/Button';
 import FieldSet from 'flarum/components/FieldSet';
 
-import GeotagModal from 'avatar4eg/geotags/components/GeotagModal';
-import GeotagCreateModal from 'avatar4eg/geotags/components/GeotagCreateModal';
+import GeotagModal from 'reflar/geotags/components/GeotagModal';
 
 export default class GeotagListModal extends Modal {
     init() {
         this.textAreaObj = this.props.textAreaObj;
+        console.log(this.textAreaObj.geotags)
     }
 
     className() {
@@ -39,7 +39,7 @@ export default class GeotagListModal extends Modal {
                                             parent.hide();
                                             app.modal.show(new GeotagModal({geotag}));
                                         }
-                                    }, geotag.title()),
+                                    }, geotag.lat() + '°, ' + geotag.lng() + '°'),
                                     Button.component({
                                         className: 'Button Button--icon Button--link',
                                         icon: 'times',
@@ -53,15 +53,6 @@ export default class GeotagListModal extends Modal {
                         })
                     ]
                 }),
-                Button.component({
-                    className: 'Button Button--primary',
-                    children: app.translator.trans('reflar-geotags.forum.list_modal.geotags_add_title'),
-                    onclick: function (e) {
-                        e.preventDefault();
-                        parent.hide();
-                        app.modal.show(new GeotagCreateModal({'textAreaObj': parent.textAreaObj}));
-                    }
-                })
             ])
         ]
     }

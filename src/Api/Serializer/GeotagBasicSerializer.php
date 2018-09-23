@@ -1,7 +1,7 @@
 <?php
 namespace Reflar\Geotags\Api\Serializer;
 
-use Avatar4eg\Geotags\Geotag;
+use Reflar\Geotags\Geotag;
 use Flarum\Api\Serializer\AbstractSerializer;
 use Flarum\Core\Access\Gate;
 use InvalidArgumentException;

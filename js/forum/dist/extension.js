@@ -254,7 +254,7 @@ $.fn.locationPicker = function(options) {
 };
 'use strict';
 
-System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app', 'flarum/components/CommentPost', 'flarum/helpers/icon', 'flarum/helpers/punctuateSeries', 'avatar4eg/geotags/models/Geotag', 'avatar4eg/geotags/components/GeotagModal'], function (_export, _context) {
+System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app', 'flarum/components/CommentPost', 'flarum/helpers/icon', 'flarum/helpers/punctuateSeries', 'reflar/geotags/models/Geotag', 'reflar/geotags/components/GeotagModal'], function (_export, _context) {
     "use strict";
 
     var extend, app, CommentPost, icon, punctuateSeries, Geotag, GeotagModal;
@@ -273,7 +273,7 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
                                 e.preventDefault();
                                 app.modal.show(new GeotagModal({ geotag: geotag }));
                             }
-                        }, geotag.title())];
+                        }, geotag.lat() + '°, ' + geotag.lng() + '°')];
                     }
                 });
 
@@ -293,10 +293,10 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
             icon = _flarumHelpersIcon.default;
         }, function (_flarumHelpersPunctuateSeries) {
             punctuateSeries = _flarumHelpersPunctuateSeries.default;
-        }, function (_avatar4egGeotagsModelsGeotag) {
-            Geotag = _avatar4egGeotagsModelsGeotag.default;
-        }, function (_avatar4egGeotagsComponentsGeotagModal) {
-            GeotagModal = _avatar4egGeotagsComponentsGeotagModal.default;
+        }, function (_reflarGeotagsModelsGeotag) {
+            Geotag = _reflarGeotagsModelsGeotag.default;
+        }, function (_reflarGeotagsComponentsGeotagModal) {
+            GeotagModal = _reflarGeotagsComponentsGeotagModal.default;
         }],
         execute: function () {}
     };
@@ -334,8 +334,8 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                         this.mapField = null;
 
                         this.geotagData = {
-                            lat: m.prop(40.7128),
-                            lng: m.prop(74.0060)
+                            lat: m.prop(38.8977),
+                            lng: m.prop(-77.0365)
                         };
 
                         this.geotag = app.store.createRecord('geotags');
@@ -409,9 +409,6 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                     key: 'updateLocation',
                     value: function updateLocation(type, value) {
                         var parent = this;
-
-                        console.log(value);
-                        console.log(type);
                         if (type === 'lng') {
                             parent.geotagData.lng(value);
                             parent.mapField.setLocation(parent.geotagData.lat(), value);
@@ -419,7 +416,6 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                             parent.geotagData.lat(value);
                             parent.mapField.setLocation(value, parent.geotagData.lng());
                         }
-                        console.log(this.geotagData.lng());
                     }
                 }, {
                     key: 'getLocation',
@@ -427,14 +423,13 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                         var parent = this;
                         var picker = parent.mapField;
                         if ('geolocation' in navigator) {
-                            m.startComputation();
                             navigator.geolocation.getCurrentPosition(function (position) {
+                                m.startComputation();
                                 parent.geotagData.lat(position.coords.latitude);
                                 parent.geotagData.lng(position.coords.longitude);
                                 picker.setLocation(position.coords.latitude, position.coords.longitude);
+                                m.endComputation();
                             });
-                            m.redraw.strategy('diff');
-                            m.endComputation();
                         }
                     }
                 }, {
@@ -444,15 +439,9 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                         if (this.loading) return;
                         this.loading = true;
 
-                        this.textAreaObj.insertAtCursor(markdownString);
-                        if (this.textAreaObj.props.preview) {
-                            this.textAreaObj.props.preview();
-                        }
-
                         this.geotag.pushAttributes({
                             lat: this.geotagData.lat(),
-                            lng: this.geotagData.lng(),
-                            country: this.geotagData.country()
+                            lng: this.geotagData.lng()
                         });
                         this.textAreaObj.geotags.push(this.geotag);
                         this.loading = false;
@@ -472,9 +461,9 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                                         location: { latitude: parent.geotagData.lat(), longitude: parent.geotagData.lng() }
                                     },
                                     locationChanged: function locationChanged(currentLocation) {
-                                        console.log(currentLocation.location);
                                         parent.geotagData.lat(currentLocation.location.latitude !== undefined ? currentLocation.location.latitude : parent.geotagData.lat());
                                         parent.geotagData.lng(currentLocation.location.longitude !== undefined ? currentLocation.location.longitude : parent.geotagData.lng());
+                                        m.redraw();
                                     }
                                 });
                             }
@@ -490,10 +479,10 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
 });;
 'use strict';
 
-System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'flarum/components/Modal', 'flarum/components/Button', 'flarum/components/FieldSet', 'avatar4eg/geotags/components/GeotagModal', 'avatar4eg/geotags/components/GeotagCreateModal'], function (_export, _context) {
+System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'flarum/components/Modal', 'flarum/components/Button', 'flarum/components/FieldSet', 'reflar/geotags/components/GeotagModal'], function (_export, _context) {
     "use strict";
 
-    var app, Modal, Button, FieldSet, GeotagModal, GeotagCreateModal, GeotagListModal;
+    var app, Modal, Button, FieldSet, GeotagModal, GeotagListModal;
     return {
         setters: [function (_flarumApp) {
             app = _flarumApp.default;
@@ -503,10 +492,8 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
             Button = _flarumComponentsButton.default;
         }, function (_flarumComponentsFieldSet) {
             FieldSet = _flarumComponentsFieldSet.default;
-        }, function (_avatar4egGeotagsComponentsGeotagModal) {
-            GeotagModal = _avatar4egGeotagsComponentsGeotagModal.default;
-        }, function (_avatar4egGeotagsComponentsGeotagCreateModal) {
-            GeotagCreateModal = _avatar4egGeotagsComponentsGeotagCreateModal.default;
+        }, function (_reflarGeotagsComponentsGeotagModal) {
+            GeotagModal = _reflarGeotagsComponentsGeotagModal.default;
         }],
         execute: function () {
             GeotagListModal = function (_Modal) {
@@ -521,6 +508,7 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                     key: 'init',
                     value: function init() {
                         this.textAreaObj = this.props.textAreaObj;
+                        console.log(this.textAreaObj.geotags);
                     }
                 }, {
                     key: 'className',
@@ -549,7 +537,7 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                                         parent.hide();
                                         app.modal.show(new GeotagModal({ geotag: geotag }));
                                     }
-                                }, geotag.title()), Button.component({
+                                }, geotag.lat() + '°, ' + geotag.lng() + '°'), Button.component({
                                     className: 'Button Button--icon Button--link',
                                     icon: 'times',
                                     title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
@@ -558,14 +546,6 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                                     }
                                 })])];
                             })]
-                        }), Button.component({
-                            className: 'Button Button--primary',
-                            children: app.translator.trans('reflar-geotags.forum.list_modal.geotags_add_title'),
-                            onclick: function onclick(e) {
-                                e.preventDefault();
-                                parent.hide();
-                                app.modal.show(new GeotagCreateModal({ 'textAreaObj': parent.textAreaObj }));
-                            }
                         })])];
                     }
                 }]);
@@ -608,13 +588,14 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                 }, {
                     key: 'title',
                     value: function title() {
-                        return this.geotag.title();
+                        return this.geotag.lat() + '°, ' + this.geotag.lat() + '°';
                     }
                 }, {
                     key: 'content',
                     value: function content() {
                         return [m('div', { className: 'Modal-body' }, [m('div', {
                             className: 'Map-field',
+                            id: 'map',
                             style: { 'width': '100%', 'height': '400px' },
                             config: this.loadMap.bind(this)
                         })])];
@@ -622,29 +603,23 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                 }, {
                     key: 'loadMap',
                     value: function loadMap(element) {
-                        var latitude = this.geotag.lat();
-                        var longitude = this.geotag.lng();
-                        var coords = new google.maps.LatLng(latitude, longitude);
-                        var mapOptions = {
-                            zoom: 15,
-                            center: coords,
-                            mapTypeControl: true,
-                            navigationControlOptions: {
-                                style: google.maps.NavigationControlStyle.SMALL
-                            },
-                            mapTypeId: google.maps.MapTypeId.ROADMAP
-                        };
-                        var map = new google.maps.Map(element, mapOptions);
-                        var marker = new google.maps.Marker({
-                            position: coords,
-                            map: map,
-                            title: this.geotag.title()
-                        });
+                        var mapField = $(element);
 
-                        $('#modal').on('shown.bs.modal', function () {
-                            google.maps.event.trigger(map, 'resize');
-                            map.setCenter(coords);
-                        });
+                        if (mapField.hasClass('olMap')) return;
+
+                        var map = new OpenLayers.Map($(element).attr('id'));
+                        map.addLayer(new OpenLayers.Layer.OSM());
+
+                        var markers = new OpenLayers.Layer.Markers("Markers");
+                        map.addLayer(markers);
+                        var iconSize = new OpenLayers.Size(32, 32);
+                        var markerIcon = new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h));
+
+                        var latLong = new OpenLayers.LonLat(this.geotag.lng(), this.geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                        map.getProjectionObject() // to Spherical Mercator Projection
+                        );
+                        markers.addMarker(new OpenLayers.Marker(latLong, markerIcon));
+                        map.setCenter(latLong, 12);
                     }
                 }]);
                 return GeotagModal;
@@ -683,7 +658,7 @@ System.register('reflar/geotags/extendEditorControls', ['flarum/extend', 'flarum
                     if (geotagsNum > 0) {
                         app.modal.show(new GeotagListModal({ textAreaObj: textAreaObj }));
                     } else {
-                        app.modal.show(new GeotagCreateModal({ textAreaObj: textAreaObj }));
+                        app.modal.show(new GeotagCreateModal({ textAreaObj: textAreaObj, 'new': false }));
                     }
                 }
             }, [icon('map-marker', { className: 'Button-icon' }), geotagsNum > 0 ? m('span', { className: 'Button-label-num' }, geotagsNum) : '', m('span', { className: 'Button-label' }, app.translator.trans('reflar-geotags.forum.post.geotag_editor_tooltip'))]), -1);
@@ -854,7 +829,6 @@ System.register('reflar/geotags/models/Geotag', ['flarum/Model', 'flarum/utils/m
                 return Geotag;
             }(mixin(Model, {
                 title: Model.attribute('title'),
-                country: Model.attribute('country'),
                 lat: Model.attribute('lat'),
                 lng: Model.attribute('lng')
             }));

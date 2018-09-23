@@ -17,7 +17,6 @@ reflar-geotags:
         view_modal:
         list_modal:
             geotags_title: => reflar-geotags.ref.geotags
-            geotags_add_title: Add new place
             geotags_list_title: Existing places
         post:
             geotags_title: => reflar-geotags.ref.geotags

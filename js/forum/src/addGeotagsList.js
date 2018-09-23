@@ -4,8 +4,8 @@ import CommentPost from 'flarum/components/CommentPost';
 import icon from 'flarum/helpers/icon';
 import punctuateSeries from 'flarum/helpers/punctuateSeries';
 
-import Geotag from 'avatar4eg/geotags/models/Geotag';
-import GeotagModal from 'avatar4eg/geotags/components/GeotagModal';
+import Geotag from 'reflar/geotags/models/Geotag';
+import GeotagModal from 'reflar/geotags/components/GeotagModal';
 
 export default function() {
     extend(CommentPost.prototype, 'footerItems', function(items) {
@@ -22,7 +22,7 @@ export default function() {
                                 e.preventDefault();
                                 app.modal.show(new GeotagModal({geotag}));
                             }
-                        }, geotag.title())
+                        }, geotag.lat() + '°, ' + geotag.lng() + '°')
                     ];
                 }
             });
