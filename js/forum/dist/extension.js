@@ -358,76 +358,103 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                 }, {
                     key: 'content',
                     value: function content() {
-                        return [m('div', { className: 'Modal-body' }, [m('div', { className: 'map-form-container' }, [m('form', { onsubmit: this.onsubmit.bind(this) }, [m('div', { className: 'Form-group' }, [m('label', {}, app.translator.trans('reflar-geotags.forum.create_modal.address_label'))]), m('div', {
-                            className: 'Map-field'
-                        }, [m('input', {
-                            'data-type': 'address',
-                            className: 'FormControl Map-address-search'
-                        }), m('input', {
-                            type: 'hidden',
-                            'data-type': 'location-store'
-                        }), m('div', {
-                            className: 'Map-container',
-                            style: 'margin-top: 10px;'
-                        }, [m('div', {
-                            'data-type': 'map',
-                            id: 'map',
-                            style: "height: 400px; width: 100%;"
-                        })])]), FieldSet.component({
-                            className: 'Map-coordinates',
-                            label: app.translator.trans('reflar-geotags.forum.create_modal.coordinates_label') + ':',
-                            children: [m('div', { className: 'Form-group' }, [m('label', {}, app.translator.trans('reflar-geotags.forum.create_modal.latitude_label')), m('input', {
-                                className: 'FormControl Map-coordinates-lat',
-                                value: this.geotagData.lat(),
-                                type: 'number',
-                                step: '0.00000001',
-                                oninput: m.withAttr('value', this.updateLocation.bind(this, 'lat'))
-                            })]), m('div', { className: 'Form-group' }, [m('label', {}, app.translator.trans('reflar-geotags.forum.create_modal.longitude_label')), m('input', {
-                                className: 'FormControl Map-coordinates-lng',
-                                value: this.geotagData.lng(),
-                                type: 'number',
-                                step: '0.00000001',
-                                oninput: m.withAttr('value', this.updateLocation.bind(this, 'lng'))
-                            })])]
-                        }), FieldSet.component({
-                            className: 'Buttons',
-                            children: [Button.component({
-                                type: 'submit',
-                                className: 'Button Button--primary',
-                                children: app.translator.trans('reflar-geotags.forum.create_modal.save_button'),
-                                loading: this.loading,
-                                disabled: this.geotagData.lng() === '' || this.geotagData.lat() === ''
-                            }), Button.component({
-                                className: 'Button Map-address-locate',
-                                icon: 'map-marker',
-                                children: app.translator.trans('reflar-geotags.forum.create_modal.locate_button'),
-                                onclick: this.getLocation.bind(this)
-                            })]
-                        })])])])];
+                        var _m, _m2;
+
+                        return m(
+                            'div',
+                            { className: 'Modal-body' },
+                            m(
+                                'div',
+                                { className: 'map-form-container' },
+                                m(
+                                    'form',
+                                    { onsubmit: this.onsubmit.bind(this) },
+                                    m(
+                                        'div',
+                                        { className: 'Map-field' },
+                                        m(
+                                            'div',
+                                            { className: 'Form-group' },
+                                            m(
+                                                'label',
+                                                null,
+                                                app.translator.trans('reflar-geotags.forum.create_modal.address_label')
+                                            )
+                                        ),
+                                        m('input', { 'data-type': 'address', className: 'FormControl Map-address-search' }),
+                                        m('input', { type: 'hidden', 'data-type': 'location-store' }),
+                                        m(
+                                            'div',
+                                            { className: 'Map-container', style: 'margin: 10px 0;' },
+                                            m('div', { 'data-type': 'map', id: 'map', style: 'height: 400px; width: 100%;' })
+                                        )
+                                    ),
+                                    FieldSet.component({
+                                        className: 'Map-coordinates',
+                                        label: app.translator.trans('reflar-geotags.forum.create_modal.coordinates_label') + ':',
+                                        children: [m(
+                                            'div',
+                                            { className: 'Form-group' },
+                                            m(
+                                                'label',
+                                                null,
+                                                app.translator.trans('reflar-geotags.forum.create_modal.latitude_label')
+                                            ),
+                                            m('input', (_m = { type: 'number', className: 'FormControl Map-coordinates-lat' }, babelHelpers.defineProperty(_m, 'type', 'number'), babelHelpers.defineProperty(_m, 'value', this.geotagData.lat()), babelHelpers.defineProperty(_m, 'step', '0.00000001'), babelHelpers.defineProperty(_m, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lat'))), _m))
+                                        ), m(
+                                            'div',
+                                            { className: 'Form-group' },
+                                            m(
+                                                'label',
+                                                null,
+                                                app.translator.trans('reflar-geotags.forum.create_modal.longitude_label')
+                                            ),
+                                            m('input', (_m2 = { type: 'number', className: 'FormControl Map-coordinates-lng' }, babelHelpers.defineProperty(_m2, 'type', 'number'), babelHelpers.defineProperty(_m2, 'value', this.geotagData.lng()), babelHelpers.defineProperty(_m2, 'step', '0.00000001'), babelHelpers.defineProperty(_m2, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lng'))), _m2))
+                                        )]
+                                    }),
+                                    FieldSet.component({
+                                        className: 'Buttons',
+                                        children: [Button.component({
+                                            type: 'submit',
+                                            className: 'Button Button--primary',
+                                            children: app.translator.trans('reflar-geotags.forum.create_modal.save_button'),
+                                            loading: this.loading,
+                                            disabled: this.geotagData.lng() === '' || this.geotagData.lat() === ''
+                                        }), Button.component({
+                                            className: 'Button Map-address-locate',
+                                            icon: 'map-marker',
+                                            children: app.translator.trans('reflar-geotags.forum.create_modal.locate_button'),
+                                            onclick: this.getLocation.bind(this)
+                                        })]
+                                    })
+                                )
+                            )
+                        );
                     }
                 }, {
                     key: 'updateLocation',
                     value: function updateLocation(type, value) {
-                        var parent = this;
                         if (type === 'lng') {
-                            parent.geotagData.lng(value);
-                            parent.mapField.setLocation(parent.geotagData.lat(), value);
+                            this.geotagData.lng(value);
+                            this.mapField.setLocation(this.geotagData.lat(), value);
                         } else {
-                            parent.geotagData.lat(value);
-                            parent.mapField.setLocation(value, parent.geotagData.lng());
+                            this.geotagData.lat(value);
+                            this.mapField.setLocation(value, this.geotagData.lng());
                         }
+
+                        m.redraw();
                     }
                 }, {
                     key: 'getLocation',
                     value: function getLocation() {
-                        var parent = this;
-                        var picker = parent.mapField;
+                        var _this2 = this;
+
                         if ('geolocation' in navigator) {
+                            m.startComputation();
                             navigator.geolocation.getCurrentPosition(function (position) {
-                                m.startComputation();
-                                parent.geotagData.lat(position.coords.latitude);
-                                parent.geotagData.lng(position.coords.longitude);
-                                picker.setLocation(position.coords.latitude, position.coords.longitude);
+                                _this2.geotagData.lat(position.coords.latitude);
+                                _this2.geotagData.lng(position.coords.longitude);
+                                _this2.mapField.setLocation(position.coords.latitude, position.coords.longitude);
                                 m.endComputation();
                             });
                         }
@@ -450,19 +477,24 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                 }, {
                     key: 'loadLocationPicker',
                     value: function loadLocationPicker(element) {
-                        var parent = this;
+                        var _this3 = this;
 
-                        parent.mapField = $(element).find('.Map-field');
+                        this.mapField = $(element).find('.Map-field');
 
                         $('#modal').on('shown.bs.modal', function () {
                             if ($('#map.olMap').length === 0) {
-                                parent.mapField.locationPicker({
+                                _this3.mapField.locationPicker({
                                     init: {
-                                        location: { latitude: parent.geotagData.lat(), longitude: parent.geotagData.lng() }
+                                        location: {
+                                            latitude: _this3.geotagData.lat(),
+                                            longitude: _this3.geotagData.lng()
+                                        }
                                     },
-                                    locationChanged: function locationChanged(currentLocation) {
-                                        parent.geotagData.lat(currentLocation.location.latitude !== undefined ? currentLocation.location.latitude : parent.geotagData.lat());
-                                        parent.geotagData.lng(currentLocation.location.longitude !== undefined ? currentLocation.location.longitude : parent.geotagData.lng());
+                                    locationChanged: function locationChanged(_ref) {
+                                        var location = _ref.location;
+
+                                        _this3.geotagData.lat(location.lat !== undefined ? location.lat : _this3.geotagData.lat());
+                                        _this3.geotagData.lng(location.long !== undefined ? location.long : _this3.geotagData.lng());
                                         m.redraw();
                                     }
                                 });
