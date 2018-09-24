@@ -40,7 +40,8 @@ class GeotagBasicSerializer extends AbstractSerializer
         }
 
         return [
-            'country'       => $geotag->country,
+            'postId'       => $geotag->post_id,
+            'userId'       => $geotag->user_id,
             'lat'           => (float) $geotag->lat,
             'lng'           => (float) $geotag->lng
         ];

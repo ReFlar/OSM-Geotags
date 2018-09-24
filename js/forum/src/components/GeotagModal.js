@@ -2,7 +2,7 @@ import Modal from 'flarum/components/Modal';
 
 export default class GeotagModal extends Modal {
     init() {
-        this.geotag = this.props.geotag;
+        this.geotags = this.props.geotags;
     }
 
     className() {
@@ -10,7 +10,15 @@ export default class GeotagModal extends Modal {
     }
 
     title() {
-        return this.geotag.lat() + '°, ' + this.geotag.lat() + '°';
+        return app.translator.trans('reflar-geotags.ref.geotags');
+    }
+
+    onready() {
+        this.loadMap()
+    }
+
+    onhide(){
+        $('.Map-field').remove()
     }
 
     content() {
@@ -19,31 +27,35 @@ export default class GeotagModal extends Modal {
                 m('div', {
                     className: 'Map-field',
                     id: 'map',
-                    style: {'width': '100%', 'height': '400px'},
-                    config: this.loadMap.bind(this)
+                    style: {'width': '100%', 'height': '400px'}
                 })
             ])
         ]
     }
 
     loadMap(element) {
-        var mapField = $(element)
+        $('#modal').on('shown.bs.modal', () => {
+            var mapField = $('.Map-field')
 
-        if (mapField.hasClass('olMap')) return;
+            if (mapField.hasClass('olMap') || this.geotags === null) return;
 
-        var map = new OpenLayers.Map($(element).attr('id'));
-        map.addLayer(new OpenLayers.Layer.OSM());
+            var map = new OpenLayers.Map(mapField.attr('id'));
+            map.addLayer(new OpenLayers.Layer.OSM());
 
-        var markers = new OpenLayers.Layer.Markers("Markers");
-        map.addLayer(markers);
-        var iconSize = new OpenLayers.Size(32, 32);
-        var markerIcon = new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h));
+            var markers = new OpenLayers.Layer.Markers("Markers");
+            map.addLayer(markers);
+            var iconSize = new OpenLayers.Size(32, 32);
 
-        var latLong = new OpenLayers.LonLat(this.geotag.lng(), this.geotag.lat()).transform(
-            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-            map.getProjectionObject() // to Spherical Mercator Projection
-        );
-        markers.addMarker(new OpenLayers.Marker(latLong, markerIcon));
-        map.setCenter(latLong, 12);
+            this.geotags.map(geotag => {
+                var latLong = new OpenLayers.LonLat(geotag.lng(), geotag.lat()).transform(
+                    new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                    map.getProjectionObject() // to Spherical Mercator Projection
+                );
+                markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
+            });
+            map.zoomToExtent(markers.getDataExtent());
+            console.log(markers)
+            this.geotags = null;
+        });
     }
 }

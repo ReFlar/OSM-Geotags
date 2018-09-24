@@ -53,14 +53,14 @@ export default class GeotagCreateModal extends Modal {
                                 <label>{app.translator.trans('reflar-geotags.forum.create_modal.latitude_label')}</label>
                                 <input type="number" className="FormControl Map-coordinates-lat" type="number"
                                        value={this.geotagData.lat()}
-                                       step="0.00000001"
+                                       step="any"
                                        onchange={m.withAttr('value', this.updateLocation.bind(this, 'lat'))}/>
                             </div>,
                             <div className="Form-group">
                                 <label>{app.translator.trans('reflar-geotags.forum.create_modal.longitude_label')}</label>
                                 <input type="number" className="FormControl Map-coordinates-lng" type="number"
                                        value={this.geotagData.lng()}
-                                       step="0.00000001"
+                                       step="any"
                                        onchange={m.withAttr('value', this.updateLocation.bind(this, 'lng'))}/>
                             </div>
                         ],

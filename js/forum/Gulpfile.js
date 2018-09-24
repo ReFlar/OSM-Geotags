@@ -2,7 +2,7 @@ var gulp = require('flarum-gulp');
 
 gulp({
     files: [
-        'node_modules/osm-locationpicker/src/location-picker.js'
+        'node_modules/osm-locationpicker/dist/location-picker.min.js'
     ],
     modules: {
         'reflar/geotags': [

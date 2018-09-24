@@ -1,265 +1,24 @@
-$.fn.locationPicker = function(options) {
-
-    var $this = this
-    var settings = $.extend({
-        address_el: 'input[data-type="address"]',
-        map_el: '[data-type="map"]',
-        save_el: '[data-type="location-store"]',
-        raw_data: false,
-        init: {
-            current_location: true
-        }
-    }, options)
-
-    var data = {}
-
-    var txtAddress = $(settings.address_el)
-    var mapEl = $(settings.map_el)
-    var saveEl = $(settings.save_el)
-    var init_zoom = 12
-    var zoom = null
-    var icon_url = 'https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png' //'/img/marker-icon.png'
-
-    var createMarkerIcon = function() {
-        var iconSize = new OpenLayers.Size(32, 32)
-        var iconOffset = new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h)
-        var icon = new OpenLayers.Icon(icon_url, iconSize, iconOffset)
-
-        return icon
-    }
-
-    var markerIcon = createMarkerIcon()
-
-    var generateRandId = function() {
-        var randLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26))
-        var id = randLetter + Date.now()
-        return id
-    }
-
-    var clear = function() {
-        data = {}
-        markers.clearMarkers()
-        saveData()
-
-        onLocationChanged()
-    }
-
-    var saveData = function() {
-        if (saveEl.length > 0) {
-            saveEl.val(JSON.stringify(data))
-        }
-    }
-
-    var readPlace = function(place) {
-            var result = {
-                address: place.formatted_address,
-                location: {
-                    lat: place.geometry.location.lat(),
-                    long: place.geometry.location.lng()
-                }
-            }
-
-            if (settings.raw_data) {
-                data.raw = place
-            }
-
-            return result
-        }
-        /* Open Street Map config */
-    var setMapLocation = function(lat, long, centerMap) {
-
-        if (centerMap === undefined) centerMap = true
-
-        setAddressInternal({
-            location: new google.maps.LatLng(lat, long)
-        })
-
-        var latLong = new OpenLayers.LonLat(long, lat).transform(
-            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-            map.getProjectionObject() // to Spherical Mercator Projection
-        )
-
-        if (!zoom) {
-            zoom = init_zoom
-        } else {
-            zoom = map.getZoom()
-        }
-
-        if (centerMap) {
-            map.setCenter(latLong, zoom)
-        }
-
-        marker = new OpenLayers.Marker(latLong, markerIcon)
-
-        markers.clearMarkers()
-        markers.addMarker(marker)
-    }
-
-    OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
-        defaultHandlerOptions: {
-            'single': true,
-            'double': false,
-            'pixelTolerance': 0,
-            'stopSingle': false,
-            'stopDouble': false
-        },
-
-        initialize: function(options) {
-            this.handlerOptions = OpenLayers.Util.extend({}, this.defaultHandlerOptions)
-            OpenLayers.Control.prototype.initialize.apply(
-                this, arguments
-            )
-            this.handler = new OpenLayers.Handler.Click(
-                this, {
-                    'click': this.trigger
-                }, this.handlerOptions
-            )
-        },
-
-        trigger: function(e) {
-            var latLong = map.getLonLatFromPixel(e.xy).transform(
-                    map.getProjectionObject(),
-                    new OpenLayers.Projection("EPSG:4326")) // transform to WGS 1984
-
-            data = {
-                location: {
-                    lat: latLong.lat,
-                    long: latLong.lon
-                }
-            }
-
-            // TODO init map with reverse geocode
-            geoCoder.geocode({
-                location: new google.maps.LatLng(latLong.lat, latLong.lon)
-            }, function(result, status) {
-                if (status == 'OK') {
-                    data = readPlace(result[0])
-                }
-
-                setMapLocation(data.location.lat, data.location.long, false)
-                onLocationChanged()
-            })
-        }
-
-    })
-
-    var mapId = mapEl.attr('id')
-    if (!mapId) {
-        mapEl.attr('id', generateRandId())
-    }
-
-    var map = new OpenLayers.Map(mapEl.attr('id'))
-    map.addLayer(new OpenLayers.Layer.OSM())
-
-    var markers = new OpenLayers.Layer.Markers("Markers")
-    map.addLayer(markers)
-
-    var click = new OpenLayers.Control.Click()
-    map.addControl(click)
-    click.activate()
-
-    var marker = null
-
-
-    /* Google maps config */
-    geoCoder = new google.maps.Geocoder()
-
-    var autocomplete = new google.maps.places.Autocomplete(
-        txtAddress[0], {
-            types: ['geocode']
-        })
-
-
-    google.maps.event.addListener(autocomplete, 'place_changed', function() {
-        place = autocomplete.getPlace()
-
-        data = readPlace(place)
-        setMapLocation(data.location.lat, data.location.long)
-        onLocationChanged()
-    })
-
-    this.getData = function() {
-        return data
-    }
-
-    this.getAddress = function() {
-        return data.formatted_address
-    }
-
-    var setAddressInternal = function(args) {
-        geoCoder.geocode(args, function(result, status) {
-            if (status == 'OK') {
-                if (result.length > 0) {
-                    data = readPlace(result[0])
-
-                    setMapLocation(data.location.lat, data.location.long)
-                    onLocationChanged()
-
-                } else {
-                    clear()
-                }
-            }
-        })
-    }
-
-    this.setAddress = function(address) {
-        setAddressInternal({
-            address: address
-        })
-    }
-
-    this.setLocation = function(lat, long) {
-        setAddressInternal({
-            location: new google.maps.LatLng(lat, long)
-        })
-    }
-
-    var init = function() {
-        if (settings.init) {
-            if (settings.init.current_location) {
-                // set map to current location
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        setMapLocation(position.coords.latitude, position.coords.longitude)
-                    }, function(error) {
-                        // set map to default location
-                        setMapLocation(49.8419505, 24.0315968)
-                    })
-                }
-            } else if (settings.init.address) {
-                $this.setAddress(settings.init.address)
-            } else if (settings.init.location) {
-                $this.setLocation(settings.init.location)
-            }
-        }
-    }
-
-    var onLocationChanged = function() {
-
-        if (data.address) {
-            txtAddress.val(data.address)
-        }
-
-        saveData()
-
-        if (settings.locationChanged) {
-            settings.locationChanged(data)
-        }
-    }
-
-    init()
-
-    return this
-};
+$.fn.locationPicker=function(e){var n,t,a=this,o=$.extend({address_el:'input[data-type="address"]',map_el:'[data-type="map"]',save_el:'[data-type="location-store"]',raw_data:!1,init:{current_location:!0}},e),r={},i=$(o.address_el),l=$(o.map_el),s=$(o.save_el),d=null,c=(n=new OpenLayers.Size(32,32),t=new OpenLayers.Pixel(-n.w/2,-n.h),new OpenLayers.Icon("https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png",n,t)),g=function(){s.length>0&&s.val(JSON.stringify(r))},p=function(e){var n={address:e.formatted_address,location:{lat:e.geometry.location.lat(),long:e.geometry.location.lng()}};return o.raw_data&&(r.raw=e),n},u=function(e,n,t){void 0===t&&(t=!0),m({location:new google.maps.LatLng(e,n)});var a=new OpenLayers.LonLat(n,e).transform(new OpenLayers.Projection("EPSG:4326"),L.getProjectionObject());d=d?L.getZoom():12,t&&L.setCenter(a,d),O=new OpenLayers.Marker(a,c),y.clearMarkers(),y.addMarker(O)};OpenLayers.Control.Click=OpenLayers.Class(OpenLayers.Control,{defaultHandlerOptions:{single:!0,double:!1,pixelTolerance:0,stopSingle:!1,stopDouble:!1},initialize:function(e){this.handlerOptions=OpenLayers.Util.extend({},this.defaultHandlerOptions),OpenLayers.Control.prototype.initialize.apply(this,arguments),this.handler=new OpenLayers.Handler.Click(this,{click:this.trigger},this.handlerOptions)},trigger:function(e){var n=L.getLonLatFromPixel(e.xy).transform(L.getProjectionObject(),new OpenLayers.Projection("EPSG:4326"));r={location:{lat:n.lat,long:n.lon}},geoCoder.geocode({location:new google.maps.LatLng(n.lat,n.lon)},function(e,n){"OK"==n&&(r=p(e[0])),u(r.location.lat,r.location.long,!1),w()})}}),l.attr("id")||l.attr("id",String.fromCharCode(65+Math.floor(26*Math.random()))+Date.now());var L=new OpenLayers.Map(l.attr("id"));L.addLayer(new OpenLayers.Layer.OSM);var y=new OpenLayers.Layer.Markers("Markers");L.addLayer(y);var f=new OpenLayers.Control.Click;L.addControl(f),f.activate();var O=null;geoCoder=new google.maps.Geocoder;var h=new google.maps.places.Autocomplete(i[0],{types:["geocode"]});google.maps.event.addListener(h,"place_changed",function(){place=h.getPlace(),r=p(place),u(r.location.lat,r.location.long),w()}),this.getData=function(){return r},this.getAddress=function(){return r.formatted_address};var m=function(e){geoCoder.geocode(e,function(e,n){"OK"==n&&(e.length>0?(r=p(e[0]),u(r.location.lat,r.location.long),w()):(r={},y.clearMarkers(),g(),w()))})};this.setAddress=function(e){m({address:e})},this.setLocation=function(e,n){m({location:new google.maps.LatLng(e,n)})};var w=function(){r.address&&i.val(r.address),g(),o.locationChanged&&o.locationChanged(r)};return o.init&&(o.init.current_location?navigator.geolocation&&navigator.geolocation.getCurrentPosition(function(e){u(e.coords.latitude,e.coords.longitude)},function(e){u(49.8419505,24.0315968)}):o.init.address?a.setAddress(o.init.address):o.init.location&&a.setLocation(o.init.location.latitude,o.init.location.longitude)),this};;
 'use strict';
 
-System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app', 'flarum/components/CommentPost', 'flarum/helpers/icon', 'flarum/helpers/punctuateSeries', 'reflar/geotags/models/Geotag', 'reflar/geotags/components/GeotagModal'], function (_export, _context) {
+System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app', 'flarum/components/Button', 'flarum/components/CommentPost', 'flarum/components/IndexPage', 'flarum/helpers/icon', 'flarum/helpers/punctuateSeries', 'reflar/geotags/models/Geotag', 'reflar/geotags/components/GeotagModal'], function (_export, _context) {
     "use strict";
 
-    var extend, app, CommentPost, icon, punctuateSeries, Geotag, GeotagModal;
+    var extend, app, Button, CommentPost, IndexPage, icon, punctuateSeries, Geotag, GeotagModal;
 
     _export('default', function () {
+
+        extend(IndexPage.prototype, 'viewItems', function (items) {
+            items.add('geotags', Button.component({
+                title: app.translator.trans('core.forum.index.mark_all_as_read_tooltip'),
+                icon: 'map-marker',
+                className: 'Button Button--icon',
+                onclick: function onclick() {
+                    app.modal.show(new GeotagModal({ geotags: app.store.all('geotags') }));
+                }
+            }));
+        });
+
         extend(CommentPost.prototype, 'footerItems', function (items) {
             var post = this.props.post;
             var geotags = post.geotags();
@@ -271,7 +30,7 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
                             href: '#',
                             onclick: function onclick(e) {
                                 e.preventDefault();
-                                app.modal.show(new GeotagModal({ geotag: geotag }));
+                                app.modal.show(new GeotagModal({ geotags: [geotag] }));
                             }
                         }, geotag.lat() + '°, ' + geotag.lng() + '°')];
                     }
@@ -287,8 +46,12 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
             extend = _flarumExtend.extend;
         }, function (_flarumApp) {
             app = _flarumApp.default;
+        }, function (_flarumComponentsButton) {
+            Button = _flarumComponentsButton.default;
         }, function (_flarumComponentsCommentPost) {
             CommentPost = _flarumComponentsCommentPost.default;
+        }, function (_flarumComponentsIndexPage) {
+            IndexPage = _flarumComponentsIndexPage.default;
         }, function (_flarumHelpersIcon) {
             icon = _flarumHelpersIcon.default;
         }, function (_flarumHelpersPunctuateSeries) {
@@ -400,7 +163,7 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                                                 null,
                                                 app.translator.trans('reflar-geotags.forum.create_modal.latitude_label')
                                             ),
-                                            m('input', (_m = { type: 'number', className: 'FormControl Map-coordinates-lat' }, babelHelpers.defineProperty(_m, 'type', 'number'), babelHelpers.defineProperty(_m, 'value', this.geotagData.lat()), babelHelpers.defineProperty(_m, 'step', '0.00000001'), babelHelpers.defineProperty(_m, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lat'))), _m))
+                                            m('input', (_m = { type: 'number', className: 'FormControl Map-coordinates-lat' }, babelHelpers.defineProperty(_m, 'type', 'number'), babelHelpers.defineProperty(_m, 'value', this.geotagData.lat()), babelHelpers.defineProperty(_m, 'step', 'any'), babelHelpers.defineProperty(_m, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lat'))), _m))
                                         ), m(
                                             'div',
                                             { className: 'Form-group' },
@@ -409,7 +172,7 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                                                 null,
                                                 app.translator.trans('reflar-geotags.forum.create_modal.longitude_label')
                                             ),
-                                            m('input', (_m2 = { type: 'number', className: 'FormControl Map-coordinates-lng' }, babelHelpers.defineProperty(_m2, 'type', 'number'), babelHelpers.defineProperty(_m2, 'value', this.geotagData.lng()), babelHelpers.defineProperty(_m2, 'step', '0.00000001'), babelHelpers.defineProperty(_m2, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lng'))), _m2))
+                                            m('input', (_m2 = { type: 'number', className: 'FormControl Map-coordinates-lng' }, babelHelpers.defineProperty(_m2, 'type', 'number'), babelHelpers.defineProperty(_m2, 'value', this.geotagData.lng()), babelHelpers.defineProperty(_m2, 'step', 'any'), babelHelpers.defineProperty(_m2, 'onchange', m.withAttr('value', this.updateLocation.bind(this, 'lng'))), _m2))
                                         )]
                                     }),
                                     FieldSet.component({
@@ -539,8 +302,7 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                 babelHelpers.createClass(GeotagListModal, [{
                     key: 'init',
                     value: function init() {
-                        this.textAreaObj = this.props.textAreaObj;
-                        console.log(this.textAreaObj.geotags);
+                        this.geotag = this.props.textAreaObj.geotags[0];
                     }
                 }, {
                     key: 'className',
@@ -556,28 +318,24 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                     key: 'content',
                     value: function content() {
                         var parent = this;
-                        var geotags = parent.textAreaObj.geotags;
-
                         return [m('div', { className: 'Modal-body' }, [FieldSet.component({
                             className: 'Geotags-list',
                             label: app.translator.trans('reflar-geotags.forum.list_modal.geotags_list_title') + ':',
-                            children: [geotags.map(function (geotag, i) {
-                                return [m('li', { className: 'Geotags-item' }, [m('a', {
-                                    href: '#',
-                                    onclick: function onclick(e) {
-                                        e.preventDefault();
-                                        parent.hide();
-                                        app.modal.show(new GeotagModal({ geotag: geotag }));
-                                    }
-                                }, geotag.lat() + '°, ' + geotag.lng() + '°'), Button.component({
-                                    className: 'Button Button--icon Button--link',
-                                    icon: 'times',
-                                    title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
-                                    onclick: function onclick() {
-                                        geotags.splice(i, 1);
-                                    }
-                                })])];
-                            })]
+                            children: [m('li', { className: 'Geotags-item' }, [m('a', {
+                                href: '#',
+                                onclick: function onclick(e) {
+                                    e.preventDefault();
+                                    parent.hide();
+                                    app.modal.show(new GeotagModal({ geotags: [parent.geotag] }));
+                                }
+                            }, this.geotag.lat() + '°, ' + this.geotag.lng() + '°'), Button.component({
+                                className: 'Button Button--icon Button--link',
+                                icon: 'times',
+                                title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
+                                onclick: function onclick() {
+                                    geotags.splice(i, 1);
+                                }
+                            })])]
                         })])];
                     }
                 }]);
@@ -610,7 +368,7 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                 babelHelpers.createClass(GeotagModal, [{
                     key: 'init',
                     value: function init() {
-                        this.geotag = this.props.geotag;
+                        this.geotags = this.props.geotags;
                     }
                 }, {
                     key: 'className',
@@ -620,7 +378,17 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                 }, {
                     key: 'title',
                     value: function title() {
-                        return this.geotag.lat() + '°, ' + this.geotag.lat() + '°';
+                        return app.translator.trans('reflar-geotags.ref.geotags');
+                    }
+                }, {
+                    key: 'onready',
+                    value: function onready() {
+                        this.loadMap();
+                    }
+                }, {
+                    key: 'onhide',
+                    value: function onhide() {
+                        $('.Map-field').remove();
                     }
                 }, {
                     key: 'content',
@@ -628,30 +396,36 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                         return [m('div', { className: 'Modal-body' }, [m('div', {
                             className: 'Map-field',
                             id: 'map',
-                            style: { 'width': '100%', 'height': '400px' },
-                            config: this.loadMap.bind(this)
+                            style: { 'width': '100%', 'height': '400px' }
                         })])];
                     }
                 }, {
                     key: 'loadMap',
                     value: function loadMap(element) {
-                        var mapField = $(element);
+                        var _this2 = this;
 
-                        if (mapField.hasClass('olMap')) return;
+                        $('#modal').on('shown.bs.modal', function () {
+                            var mapField = $('.Map-field');
 
-                        var map = new OpenLayers.Map($(element).attr('id'));
-                        map.addLayer(new OpenLayers.Layer.OSM());
+                            if (mapField.hasClass('olMap') || _this2.geotags === null) return;
 
-                        var markers = new OpenLayers.Layer.Markers("Markers");
-                        map.addLayer(markers);
-                        var iconSize = new OpenLayers.Size(32, 32);
-                        var markerIcon = new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h));
+                            var map = new OpenLayers.Map(mapField.attr('id'));
+                            map.addLayer(new OpenLayers.Layer.OSM());
 
-                        var latLong = new OpenLayers.LonLat(this.geotag.lng(), this.geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-                        map.getProjectionObject() // to Spherical Mercator Projection
-                        );
-                        markers.addMarker(new OpenLayers.Marker(latLong, markerIcon));
-                        map.setCenter(latLong, 12);
+                            var markers = new OpenLayers.Layer.Markers("Markers");
+                            map.addLayer(markers);
+                            var iconSize = new OpenLayers.Size(32, 32);
+
+                            _this2.geotags.map(function (geotag) {
+                                var latLong = new OpenLayers.LonLat(geotag.lng(), geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                                map.getProjectionObject() // to Spherical Mercator Projection
+                                );
+                                markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon('https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-128.png', iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
+                            });
+                            map.zoomToExtent(markers.getDataExtent());
+                            console.log(markers);
+                            _this2.geotags = null;
+                        });
                     }
                 }]);
                 return GeotagModal;
@@ -857,7 +631,8 @@ System.register('reflar/geotags/models/Geotag', ['flarum/Model', 'flarum/utils/m
 
                 return Geotag;
             }(mixin(Model, {
-                title: Model.attribute('title'),
+                userId: Model.attribute('user_id'),
+                postId: Model.attribute('post_id'),
                 lat: Model.attribute('lat'),
                 lng: Model.attribute('lng')
             }));

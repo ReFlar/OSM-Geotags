@@ -7,8 +7,7 @@ import GeotagModal from 'reflar/geotags/components/GeotagModal';
 
 export default class GeotagListModal extends Modal {
     init() {
-        this.textAreaObj = this.props.textAreaObj;
-        console.log(this.textAreaObj.geotags)
+        this.geotag = this.props.textAreaObj.geotags[0];
     }
 
     className() {
@@ -21,36 +20,30 @@ export default class GeotagListModal extends Modal {
 
     content() {
         var parent = this;
-        var geotags = parent.textAreaObj.geotags;
-
         return [
             m('div', {className: 'Modal-body'}, [
                 FieldSet.component({
                     className: 'Geotags-list',
                     label: app.translator.trans('reflar-geotags.forum.list_modal.geotags_list_title') + ':',
                     children: [
-                        geotags.map(function (geotag, i) {
-                            return [
-                                m('li', {className: 'Geotags-item'}, [
-                                    m('a', {
-                                        href: '#',
-                                        onclick: function (e) {
-                                            e.preventDefault();
-                                            parent.hide();
-                                            app.modal.show(new GeotagModal({geotag}));
-                                        }
-                                    }, geotag.lat() + '°, ' + geotag.lng() + '°'),
-                                    Button.component({
-                                        className: 'Button Button--icon Button--link',
-                                        icon: 'times',
-                                        title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
-                                        onclick: function () {
-                                            geotags.splice(i, 1);
-                                        }
-                                    })
-                                ]),
-                            ];
-                        })
+                        m('li', {className: 'Geotags-item'}, [
+                            m('a', {
+                                href: '#',
+                                onclick: function (e) {
+                                    e.preventDefault();
+                                    parent.hide();
+                                    app.modal.show(new GeotagModal({geotags: [parent.geotag]}));
+                                }
+                            }, this.geotag.lat() + '°, ' + this.geotag.lng() + '°'),
+                            Button.component({
+                                className: 'Button Button--icon Button--link',
+                                icon: 'times',
+                                title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
+                                onclick: function () {
+                                    geotags.splice(i, 1);
+                                }
+                            })
+                        ]),
                     ]
                 }),
             ])
