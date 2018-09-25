@@ -36,7 +36,7 @@ class AddClientAssets
      */
     public function addAssets(ConfigureWebApp $event)
     {
-        if ($event->isForum() && $this->settings->get('reflar.geotags-gmaps-key') && $this->settings->get('reflar.geotags-gmaps-key') !== '') {
+        if ($event->isForum()) {
             $event->addAssets([
                 __DIR__.'/../../js/forum/dist/extension.js',
                 __DIR__.'/../../less/forum/extension.less'

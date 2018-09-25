@@ -12,6 +12,7 @@ reflar-geotags:
             address_label: Address
             coordinates_label: Coordinates
             latitude_label: Latitude
+            locate_button: Current Location
             longitude_label: Longitude
             save_button: Save
         view_modal:

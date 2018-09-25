@@ -1,10 +1,13 @@
 <?php
+
 namespace Reflar\Geotags\Api\Serializer;
 
-use Reflar\Geotags\Geotag;
 use Flarum\Api\Serializer\AbstractSerializer;
+use Flarum\Api\Serializer\PostBasicSerializer;
 use Flarum\Core\Access\Gate;
+use Flarum\Core\Post;
 use InvalidArgumentException;
+use Reflar\Geotags\Geotag;
 
 class GeotagBasicSerializer extends AbstractSerializer
 {
@@ -34,16 +37,28 @@ class GeotagBasicSerializer extends AbstractSerializer
      */
     protected function getDefaultAttributes($geotag)
     {
-        if (! ($geotag instanceof Geotag)) {
+        if (!($geotag instanceof Geotag)) {
             throw new InvalidArgumentException(get_class($this)
                 . ' can only serialize instances of ' . Geotag::class);
         }
 
-        return [
-            'postId'       => $geotag->post_id,
-            'userId'       => $geotag->user_id,
-            'lat'           => (float) $geotag->lat,
-            'lng'           => (float) $geotag->lng
+        $post = Post::find($geotag->post_id);
+
+        $attributes = [
+            'user_id' => $geotag->user_id,
+            'lat' => (float)$geotag->lat,
+            'lng' => (float)$geotag->lng
         ];
+
+        if ($post) {
+            $attributes['post_id'] = $post->id;
+            $tag = $post->discussion->tags[0];
+            if ($tag) {
+                $attributes['marker_color'] = $tag->color;
+                $attributes['tag_slug'] = $tag->slug;
+            }
+        }
+
+        return $attributes;
     }
 }

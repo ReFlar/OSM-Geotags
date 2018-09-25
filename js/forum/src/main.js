@@ -16,4 +16,23 @@ app.initializers.add('reflar-geotags', app => {
     addGeotagsList();
     extendEditorControls();
     extendPostData();
+
+    OpenLayers.Layer.OSM.HOT = OpenLayers.Class(OpenLayers.Layer.OSM, {
+        initialize: function(name, options) {
+            var url = [
+                "http://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png",
+                "http://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"
+            ];
+            options = OpenLayers.Util.extend({
+                numZoomLevels: 20,
+                attribution: "&copy; <a href='https://www.hotosm.org/'>Humanitarian OpenStreetMap</a>",
+                buffer: 0,
+                transitionEffect: "resize"
+            }, options);
+            var newArguments = [name, url, options];
+            OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
+        },
+
+        CLASS_NAME: "OpenLayers.Layer.OSM.HOT"
+    });
 });

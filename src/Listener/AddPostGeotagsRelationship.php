@@ -4,6 +4,7 @@ namespace Reflar\Geotags\Listener;
 use Reflar\Geotags\Api\Serializer\GeotagBasicSerializer;
 use Reflar\Geotags\Geotag;
 use Flarum\Api\Controller;
+use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Api\Serializer\PostSerializer;
 use Flarum\Core\Post;
 use Flarum\Event\ConfigureApiController;
@@ -91,7 +92,7 @@ class AddPostGeotagsRelationship
      */
     public function getApiRelationship(GetApiRelationship $event)
     {
-        if ($event->isRelationship(PostSerializer::class, 'geotags')) {
+        if ($event->isRelationship(PostSerializer::class, 'geotags') || $event->isRelationship(ForumSerializer::class, 'geotags')) {
             return $event->serializer->hasMany($event->model, GeotagBasicSerializer::class, 'geotags');
         }
     }
@@ -109,7 +110,8 @@ class AddPostGeotagsRelationship
         }
 
         if ($event->isController(Controller\ListPostsController::class)
-            || $event->isController(Controller\ShowPostController::class)) {
+            || $event->isController(Controller\ShowPostController::class)
+            || $event->isController(Controller\ShowForumController::class)) {
             $event->addInclude([
                 'geotags'
             ]);
@@ -121,6 +123,10 @@ class AddPostGeotagsRelationship
      */
     public function prepareApiData(PrepareApiData $event)
     {
+        if ($event->isController(Controller\ShowForumController::class)) {
+            $event->data['geotags'] = Geotag::get();
+        }
+
         if ($event->isController(Controller\ShowDiscussionController::class)) {
             $posts = $event->data->getRelation('posts');
         }

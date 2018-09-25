@@ -5,6 +5,7 @@ use Reflar\Geotags\Api\Controller;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Event\ConfigureApiRoutes;
 use Flarum\Event\PrepareApiAttributes;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Events\Dispatcher;
 
 class AddGeotagsApi
@@ -35,7 +36,7 @@ class AddGeotagsApi
     public function prepareApiAttributes(PrepareApiAttributes $event)
     {
         if ($event->isSerializer(ForumSerializer::class)) {
-            $event->attributes['canAddGeotags'] = $event->actor->can('avatar4eg.geotags.create');
+            $event->attributes['canAddGeotags'] = $event->actor->can('reflar.geotags.create');
         }
     }
 }

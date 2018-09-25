@@ -1,4 +1,4 @@
-import { extend } from 'flarum/extend';
+import {extend} from 'flarum/extend';
 import app from 'flarum/app';
 import Button from 'flarum/components/Button';
 import CommentPost from 'flarum/components/CommentPost';
@@ -9,22 +9,34 @@ import punctuateSeries from 'flarum/helpers/punctuateSeries';
 import Geotag from 'reflar/geotags/models/Geotag';
 import GeotagModal from 'reflar/geotags/components/GeotagModal';
 
-export default function() {
+export default function () {
 
-    extend(IndexPage.prototype, 'viewItems', function(items) {
-       items.add('geotags',
-           Button.component({
-               title: app.translator.trans('core.forum.index.mark_all_as_read_tooltip'),
-               icon: 'map-marker',
-               className: 'Button Button--icon',
-               onclick: () => {
-                   app.modal.show(new GeotagModal({geotags: app.store.all('geotags')}))
-               }
-           })
-           );
+    extend(IndexPage.prototype, 'viewItems', function (items) {
+        let geotags = [];
+        var allGeotags = app.store.all('geotags');
+        var tag = m.route();
+        if (m.route().includes('/t/')) {
+            allGeotags.map((geotag, i) => {
+                if (geotag.tagSlug() === tag.replace('/t/', '')) {
+                    geotags.push(geotag);
+                }
+            })
+        } else {
+            geotags = allGeotags;
+        }
+        items.add('geotags',
+            Button.component({
+                title: app.translator.trans('core.forum.index.mark_all_as_read_tooltip'),
+                icon: 'map-marker',
+                className: 'Button Button--icon',
+                onclick: () => {
+                    app.modal.show(new GeotagModal({geotags}))
+                }
+            })
+        );
     });
 
-    extend(CommentPost.prototype, 'footerItems', function(items) {
+    extend(CommentPost.prototype, 'footerItems', function (items) {
         const post = this.props.post;
         const geotags = post.geotags();
 
