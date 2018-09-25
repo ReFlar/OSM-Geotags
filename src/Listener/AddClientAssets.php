@@ -43,8 +43,7 @@ class AddClientAssets
             ]);
             $event->addBootstrapper('reflar/geotags/main');
 
-            $event->view->addHeadString('<script type="text/javascript" src="//maps.google.com/maps/api/js?key=' . $this->settings->get('reflar.geotags-gmaps-key') . '&amp;libraries=places"></script>
-<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>');
+            $event->view->addHeadString('<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>');
         }
 
         if ($event->isAdmin()) {

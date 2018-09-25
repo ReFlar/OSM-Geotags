@@ -20,8 +20,8 @@ app.initializers.add('reflar-geotags', app => {
     OpenLayers.Layer.OSM.HOT = OpenLayers.Class(OpenLayers.Layer.OSM, {
         initialize: function(name, options) {
             var url = [
-                "http://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png",
-                "http://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"
+                "https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png",
+                "https://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"
             ];
             options = OpenLayers.Util.extend({
                 numZoomLevels: 19,

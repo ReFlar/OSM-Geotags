@@ -26,7 +26,7 @@ export default function () {
         }
         items.add('geotags',
             Button.component({
-                title: app.translator.trans('core.forum.index.mark_all_as_read_tooltip'),
+                title: app.translator.trans('reflar-geotags.forum.post.geotags_title'),
                 icon: 'map-marker',
                 className: 'Button Button--icon',
                 onclick: () => {

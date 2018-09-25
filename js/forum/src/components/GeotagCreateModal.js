@@ -37,7 +37,6 @@ export default class GeotagCreateModal extends Modal {
                         <div className="Form-group">
                             <label>{app.translator.trans('reflar-geotags.forum.create_modal.address_label')}</label>
                         </div>
-                        <input data-type="address" className="FormControl Map-address-search" />
                         <input type="hidden" data-type="location-store" />
 
                         <div className="Map-container" style="margin: 10px 0;">
@@ -139,11 +138,11 @@ export default class GeotagCreateModal extends Modal {
                             longitude: this.geotagData.lng()
                         },
                     },
-                    locationChanged: ({ location }) => {
+                    locationChanged: (location => {
                         this.geotagData.lat(location.lat !== undefined ? location.lat : this.geotagData.lat());
                         this.geotagData.lng(location.long !== undefined ? location.long : this.geotagData.lng());
                         m.redraw();
-                    }
+                    })
                 });
             }
         });
