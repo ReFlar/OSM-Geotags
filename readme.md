@@ -1,7 +1,7 @@
 # Geotags by ReFlar
 
 A [Flarum](http://flarum.org) extension that adds places for your posts (with editor button, list of places on each post and markdown string with name of place in text).
-Uses [Logicify JQuery Location Picker plugin](https://github.com/Logicify/jquery-locationpicker-plugin).
+Uses [Open Steet Mao Location Picker](https://github.com/CDK2020/OSM-locationpicker).
 
 ### Screenshots
 
