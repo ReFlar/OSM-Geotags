@@ -15,7 +15,7 @@ export default function () {
         let geotags = [];
         var allGeotags = app.store.all('geotags');
         var tag = m.route();
-        if (m.route().includes('/t/')) {
+        if (tag.includes('/t/')) {
             allGeotags.map((geotag, i) => {
                 if (geotag.tagSlug() === tag.replace('/t/', '')) {
                     geotags.push(geotag);

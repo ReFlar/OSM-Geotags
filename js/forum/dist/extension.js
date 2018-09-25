@@ -12,7 +12,7 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
             var geotags = [];
             var allGeotags = app.store.all('geotags');
             var tag = m.route();
-            if (m.route().includes('/t/')) {
+            if (tag.includes('/t/')) {
                 allGeotags.map(function (geotag, i) {
                     if (geotag.tagSlug() === tag.replace('/t/', '')) {
                         geotags.push(geotag);
@@ -345,7 +345,8 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                                 icon: 'times',
                                 title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
                                 onclick: function onclick() {
-                                    geotags.splice(i, 1);
+                                    parent.hide();
+                                    parent.props.textAreaObj.geotags = null;
                                 }
                             })])]
                         })])];
@@ -390,12 +391,20 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                 }, {
                     key: 'title',
                     value: function title() {
-                        return app.translator.trans('reflar-geotags.ref.geotags');
+                        return app.translator.trans('reflar-geotags.forum.view_modal.title');
                     }
                 }, {
                     key: 'onready',
                     value: function onready() {
-                        this.loadMap();
+                        var _this2 = this;
+
+                        if (this.geotags.length > 1) {
+                            $('#modal').on('shown.bs.modal', function () {
+                                _this2.loadMap();
+                            });
+                        } else {
+                            this.loadMap();
+                        }
                     }
                 }, {
                     key: 'onhide',
@@ -413,40 +422,36 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                     }
                 }, {
                     key: 'loadMap',
-                    value: function loadMap(element) {
-                        var _this2 = this;
+                    value: function loadMap() {
+                        var mapField = $('.Map-field');
 
-                        $('#modal').on('shown.bs.modal', function () {
-                            var mapField = $('.Map-field');
+                        if (mapField.hasClass('olMap') || this.geotags === null) return;
 
-                            if (mapField.hasClass('olMap') || _this2.geotags === null) return;
+                        var map = new OpenLayers.Map(mapField.attr('id'));
+                        map.addLayer(new OpenLayers.Layer.OSM.HOT('HOT'));
 
-                            var map = new OpenLayers.Map(mapField.attr('id'));
-                            map.addLayer(new OpenLayers.Layer.OSM.HOT('HOT'));
+                        var markers = new OpenLayers.Layer.Markers("Markers");
+                        map.addLayer(markers);
+                        var iconSize = new OpenLayers.Size(32, 32);
 
-                            var markers = new OpenLayers.Layer.Markers("Markers");
-                            map.addLayer(markers);
-                            var iconSize = new OpenLayers.Size(32, 32);
+                        this.geotags.map(function (geotag) {
+                            var color = 'D94B43';
+                            var icon = 'fa-circle';
+                            if (app.session.user.id() == geotag.userId()) {
+                                icon = 'fa-star';
+                            }
+                            if (geotag.markerColor()) {
+                                color = geotag.markerColor().replace('#', '');
+                            }
+                            var markerUrl = 'https://cdn.mapmarker.io/api/v1/pin?icon=' + icon + '&background=' + color + '&size=50';
 
-                            _this2.geotags.map(function (geotag) {
-                                var color = 'D94B43';
-                                var icon = 'fa-circle';
-                                if (app.session.user.id() == geotag.userId()) {
-                                    icon = 'fa-star';
-                                }
-                                if (geotag.markerColor()) {
-                                    color = geotag.markerColor().replace('#', '');;
-                                }
-                                var markerUrl = 'https://cdn.mapmarker.io/api/v1/pin?icon=' + icon + '&background=' + color + '&size=50';
-
-                                var latLong = new OpenLayers.LonLat(geotag.lng(), geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
-                                map.getProjectionObject() // to Spherical Mercator Projection
-                                );
-                                markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
-                            });
-                            map.zoomToExtent(markers.getDataExtent());
-                            _this2.geotags = null;
+                            var latLong = new OpenLayers.LonLat(geotag.lng(), geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+                            map.getProjectionObject() // to Spherical Mercator Projection
+                            );
+                            markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
                         });
+                        map.zoomToExtent(markers.getDataExtent());
+                        this.geotags = null;
                     }
                 }]);
                 return GeotagModal;
@@ -630,7 +635,7 @@ System.register('reflar/geotags/main', ['flarum/app', 'flarum/models/Post', 'fla
                     initialize: function initialize(name, options) {
                         var url = ["http://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png", "http://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"];
                         options = OpenLayers.Util.extend({
-                            numZoomLevels: 20,
+                            numZoomLevels: 19,
                             attribution: "&copy; <a href='https://www.hotosm.org/'>Humanitarian OpenStreetMap</a>",
                             buffer: 0,
                             transitionEffect: "resize"

@@ -16,9 +16,10 @@ reflar-geotags:
             longitude_label: Longitude
             save_button: Save
         view_modal:
+            title: => reflar-geotags.ref.geotags
         list_modal:
             geotags_title: => reflar-geotags.ref.geotags
-            geotags_list_title: Existing places
+            geotags_list_title: Chosen Location
         post:
             geotags_title: => reflar-geotags.ref.geotags
             geotag_editor_tooltip: Edit places

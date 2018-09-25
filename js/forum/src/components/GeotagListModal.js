@@ -40,7 +40,8 @@ export default class GeotagListModal extends Modal {
                                 icon: 'times',
                                 title: app.translator.trans('reflar-geotags.forum.post.geotag_delete_tooltip'),
                                 onclick: function () {
-                                    geotags.splice(i, 1);
+                                    parent.hide();
+                                    parent.props.textAreaObj.geotags = null;
                                 }
                             })
                         ]),

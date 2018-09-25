@@ -24,7 +24,7 @@ app.initializers.add('reflar-geotags', app => {
                 "http://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"
             ];
             options = OpenLayers.Util.extend({
-                numZoomLevels: 20,
+                numZoomLevels: 19,
                 attribution: "&copy; <a href='https://www.hotosm.org/'>Humanitarian OpenStreetMap</a>",
                 buffer: 0,
                 transitionEffect: "resize"
