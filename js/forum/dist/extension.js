@@ -398,7 +398,7 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                     value: function onready() {
                         var _this2 = this;
 
-                        if (this.geotags.length > 1) {
+                        if (m.route().includes('/t/') || this.geotags.length > 1) {
                             $('#modal').on('shown.bs.modal', function () {
                                 _this2.loadMap();
                             });
@@ -448,7 +448,13 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                             var latLong = new OpenLayers.LonLat(geotag.lng(), geotag.lat()).transform(new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
                             map.getProjectionObject() // to Spherical Mercator Projection
                             );
-                            markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
+                            var marker = new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h)));
+
+                            marker.events.register('click', marker, function () {
+                                m.route(app.route.discussion(app.store.getById('discussions', geotag.discussionId())));
+                            });
+
+                            markers.addMarker(marker);
                         });
                         map.zoomToExtent(markers.getDataExtent());
                         this.geotags = null;
@@ -678,6 +684,7 @@ System.register('reflar/geotags/models/Geotag', ['flarum/Model', 'flarum/utils/m
                 lat: Model.attribute('lat'),
                 lng: Model.attribute('lng'),
                 tagSlug: Model.attribute('tag_slug'),
+                discussionId: Model.attribute('discussion_id'),
                 markerColor: Model.attribute('marker_color')
             }));
 

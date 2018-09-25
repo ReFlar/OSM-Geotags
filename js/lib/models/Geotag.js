@@ -7,5 +7,6 @@ export default class Geotag extends mixin(Model, {
     lat: Model.attribute('lat'),
     lng: Model.attribute('lng'),
     tagSlug: Model.attribute('tag_slug'),
+    discussionId: Model.attribute('discussion_id'),
     markerColor: Model.attribute('marker_color')
 }) {}

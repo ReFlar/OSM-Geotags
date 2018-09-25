@@ -14,7 +14,7 @@ export default class GeotagModal extends Modal {
     }
 
     onready() {
-        if (this.geotags.length > 1) {
+        if (m.route().includes('/t/') || this.geotags.length > 1) {
             $('#modal').on('shown.bs.modal', () => {
                 this.loadMap()
             })
@@ -66,7 +66,13 @@ export default class GeotagModal extends Modal {
                 new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
                 map.getProjectionObject() // to Spherical Mercator Projection
             );
-            markers.addMarker(new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h))));
+            var marker = new OpenLayers.Marker(latLong, new OpenLayers.Icon(markerUrl, iconSize, new OpenLayers.Pixel(-(iconSize.w / 2), -iconSize.h)));
+
+            marker.events.register('click', marker, () => {
+                    m.route(app.route.discussion(app.store.getById('discussions', geotag.discussionId())));
+                });
+
+            markers.addMarker(marker);
         });
         map.zoomToExtent(markers.getDataExtent());
         this.geotags = null;

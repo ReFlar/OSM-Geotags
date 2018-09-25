@@ -52,6 +52,7 @@ class GeotagBasicSerializer extends AbstractSerializer
 
         if ($post) {
             $attributes['post_id'] = $post->id;
+            $attributes['discussion_id'] = $post->discussion->id;
             $tag = $post->discussion->tags[0];
             if ($tag) {
                 $attributes['marker_color'] = $tag->color;
