@@ -826,7 +826,7 @@ System.register('reflar/geotags/main', ['flarum/app', 'flarum/models/Post', 'fla
 
                 OpenLayers.Layer.OSM.HOT = OpenLayers.Class(OpenLayers.Layer.OSM, {
                     initialize: function initialize(name, options) {
-                        var url = ["https://a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png", "https://b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"];
+                        var url = ["//a.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png", "//b.tile.openstreetmap.fr/hot/${z}/${x}/${y}.png"];
                         options = OpenLayers.Util.extend({
                             numZoomLevels: 19,
                             attribution: "&copy; <a href='https://www.hotosm.org/'>Humanitarian OpenStreetMap</a>",
