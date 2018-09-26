@@ -43,7 +43,7 @@ class AddClientAssets
             ]);
             $event->addBootstrapper('reflar/geotags/main');
 
-            $event->view->addHeadString('<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>');
+            $event->view->addHeadString('<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/lib/OpenLayers.js"></script>');
         }
 
         if ($event->isAdmin()) {
