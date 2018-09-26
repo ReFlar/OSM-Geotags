@@ -7,7 +7,9 @@ export default class GeotagCreateModal extends Modal {
     init() {
         this.textAreaObj = this.props.textAreaObj;
         this.loading = false;
-        this.mapField = null;
+
+
+        this.map = null;
 
         this.geotagData = {
             lat: m.prop(38.8977),
@@ -25,8 +27,14 @@ export default class GeotagCreateModal extends Modal {
         return app.translator.trans('reflar-geotags.forum.create_modal.default_title');
     }
 
+    onhide() {
+        this.map.setLocation(38.8977, -77.0365)
+    }
+
     onready() {
-        this.loadLocationPicker()
+        $('#modal').on('shown.bs.modal', () => {
+            this.loadLocationPicker()
+        });
     }
 
     content() {
@@ -37,7 +45,7 @@ export default class GeotagCreateModal extends Modal {
                         <div className="Form-group">
                             <label>{app.translator.trans('reflar-geotags.forum.create_modal.address_label')}</label>
                         </div>
-                        <input type="hidden" data-type="location-store" />
+                        <input type="hidden" data-type="location-store"/>
 
                         <div className="Map-container" style="margin: 10px 0;">
                             <div data-type="map" id="map" style="height: 400px; width: 100%;"/>
@@ -91,23 +99,29 @@ export default class GeotagCreateModal extends Modal {
     updateLocation(type, value) {
         if (type === 'lng') {
             this.geotagData.lng(value);
-            this.mapField.setLocation(this.geotagData.lat(), value)
-        } else {
+            this.map.setLocation(this.geotagData.lat(), value)
+        } else if (type === 'lat') {
             this.geotagData.lat(value);
-            this.mapField.setLocation(value, this.geotagData.lng())
+            this.map.setLocation(value, this.geotagData.lng())
+        } else if (this.map) {
+            var data = this.map.getData()
+            this.geotagData.lat(data.lat);
+            this.geotagData.lng(data.long);
         }
-
-        m.redraw();
+        if (window.chrome && window.chrome.webstore) {
+            m.redraw()
+        }
     }
 
     getLocation() {
-        if('geolocation' in navigator) {
-            m.startComputation();
+        if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(position => {
                 this.geotagData.lat(position.coords.latitude);
                 this.geotagData.lng(position.coords.longitude);
-                this.mapField.setLocation(position.coords.latitude, position.coords.longitude);
-                m.endComputation();
+                this.map.setLocation(position.coords.latitude, position.coords.longitude);
+                if (window.chrome && window.chrome.webstore) {
+                    m.redraw()
+                }
             });
         }
     }
@@ -126,25 +140,20 @@ export default class GeotagCreateModal extends Modal {
         this.hide();
     }
 
-    loadLocationPicker(element) {
-        this.mapField = $(element).find('.Map-field');
+    loadLocationPicker() {
+        var mapField = $('.Map-field').find('.Map-field');
 
-        $('#modal').on('shown.bs.modal', () => {
-            if ($('#map.olMap').length === 0) {
-                this.mapField.locationPicker({
-                    init: {
-                        location: {
-                            latitude: this.geotagData.lat(),
-                            longitude: this.geotagData.lng()
-                        },
+        if ($('#map.olMap').length === 0) {
+            mapField.locationPicker({
+                init: {
+                    location: {
+                        latitude: this.geotagData.lat(),
+                        longitude: this.geotagData.lng()
                     },
-                    locationChanged: (location => {
-                        this.geotagData.lat(location.lat !== undefined ? location.lat : this.geotagData.lat());
-                        this.geotagData.lng(location.long !== undefined ? location.long : this.geotagData.lng());
-                        m.redraw();
-                    })
-                });
-            }
-        });
+                },
+                locationChanged: this.updateLocation.bind(this)
+            })
+            this.map = mapField;
+        }
     }
 }

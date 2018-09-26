@@ -135,10 +135,6 @@ $.fn.locationPicker = function (options) {
         return data
     }
 
-    this.getAddress = function () {
-        return data.formatted_address
-    }
-
     var setAddressInternal = function (lat, long) {
         setMapLocation(lat, long)
         data = {
@@ -148,7 +144,7 @@ $.fn.locationPicker = function (options) {
         onLocationChanged()
     }
 
-    this.setLocation = function (lat, long) {
+    this.setLocation = function(lat, long) {
         setAddressInternal(lat, long)
     }
 
@@ -228,7 +224,7 @@ System.register('reflar/geotags/addGeotagsList', ['flarum/extend', 'flarum/app',
                             href: '#',
                             onclick: function onclick(e) {
                                 e.preventDefault();
-                                app.modal.show(new GeotagModal({ geotags: [geotag] }));
+                                app.modal.show(new GeotagModal({ geotags: [geotag], wait: false }));
                             }
                         }, geotag.lat() + '°, ' + geotag.lng() + '°')];
                     }
@@ -292,7 +288,8 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                     value: function init() {
                         this.textAreaObj = this.props.textAreaObj;
                         this.loading = false;
-                        this.mapField = null;
+
+                        this.map = null;
 
                         this.geotagData = {
                             lat: m.prop(38.8977),
@@ -312,9 +309,18 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                         return app.translator.trans('reflar-geotags.forum.create_modal.default_title');
                     }
                 }, {
+                    key: 'onhide',
+                    value: function onhide() {
+                        this.map.setLocation(38.8977, -77.0365);
+                    }
+                }, {
                     key: 'onready',
                     value: function onready() {
-                        this.loadLocationPicker();
+                        var _this2 = this;
+
+                        $('#modal').on('shown.bs.modal', function () {
+                            _this2.loadLocationPicker();
+                        });
                     }
                 }, {
                     key: 'content',
@@ -396,26 +402,32 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                     value: function updateLocation(type, value) {
                         if (type === 'lng') {
                             this.geotagData.lng(value);
-                            this.mapField.setLocation(this.geotagData.lat(), value);
-                        } else {
+                            this.map.setLocation(this.geotagData.lat(), value);
+                        } else if (type === 'lat') {
                             this.geotagData.lat(value);
-                            this.mapField.setLocation(value, this.geotagData.lng());
+                            this.map.setLocation(value, this.geotagData.lng());
+                        } else if (this.map) {
+                            var data = this.map.getData();
+                            this.geotagData.lat(data.lat);
+                            this.geotagData.lng(data.long);
                         }
-
-                        m.redraw();
+                        if (window.chrome && window.chrome.webstore) {
+                            m.redraw();
+                        }
                     }
                 }, {
                     key: 'getLocation',
                     value: function getLocation() {
-                        var _this2 = this;
+                        var _this3 = this;
 
                         if ('geolocation' in navigator) {
-                            m.startComputation();
                             navigator.geolocation.getCurrentPosition(function (position) {
-                                _this2.geotagData.lat(position.coords.latitude);
-                                _this2.geotagData.lng(position.coords.longitude);
-                                _this2.mapField.setLocation(position.coords.latitude, position.coords.longitude);
-                                m.endComputation();
+                                _this3.geotagData.lat(position.coords.latitude);
+                                _this3.geotagData.lng(position.coords.longitude);
+                                _this3.map.setLocation(position.coords.latitude, position.coords.longitude);
+                                if (window.chrome && window.chrome.webstore) {
+                                    m.redraw();
+                                }
                             });
                         }
                     }
@@ -436,28 +448,21 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                     }
                 }, {
                     key: 'loadLocationPicker',
-                    value: function loadLocationPicker(element) {
-                        var _this3 = this;
+                    value: function loadLocationPicker() {
+                        var mapField = $('.Map-field').find('.Map-field');
 
-                        this.mapField = $(element).find('.Map-field');
-
-                        $('#modal').on('shown.bs.modal', function () {
-                            if ($('#map.olMap').length === 0) {
-                                _this3.mapField.locationPicker({
-                                    init: {
-                                        location: {
-                                            latitude: _this3.geotagData.lat(),
-                                            longitude: _this3.geotagData.lng()
-                                        }
-                                    },
-                                    locationChanged: function locationChanged(location) {
-                                        _this3.geotagData.lat(location.lat !== undefined ? location.lat : _this3.geotagData.lat());
-                                        _this3.geotagData.lng(location.long !== undefined ? location.long : _this3.geotagData.lng());
-                                        m.redraw();
+                        if ($('#map.olMap').length === 0) {
+                            mapField.locationPicker({
+                                init: {
+                                    location: {
+                                        latitude: this.geotagData.lat(),
+                                        longitude: this.geotagData.lng()
                                     }
-                                });
-                            }
-                        });
+                                },
+                                locationChanged: this.updateLocation.bind(this)
+                            });
+                            this.map = mapField;
+                        }
                     }
                 }]);
                 return GeotagCreateModal;
@@ -521,7 +526,7 @@ System.register('reflar/geotags/components/GeotagListModal', ['flarum/app', 'fla
                                 onclick: function onclick(e) {
                                     e.preventDefault();
                                     parent.hide();
-                                    app.modal.show(new GeotagModal({ geotags: [parent.geotag] }));
+                                    app.modal.show(new GeotagModal({ geotags: [parent.geotag], wait: true }));
                                 }
                             }, this.geotag.lat() + '°, ' + this.geotag.lng() + '°'), Button.component({
                                 className: 'Button Button--icon Button--link',
@@ -563,9 +568,7 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
 
                 babelHelpers.createClass(GeotagModal, [{
                     key: 'init',
-                    value: function init() {
-                        this.geotags = this.props.geotags;
-                    }
+                    value: function init() {}
                 }, {
                     key: 'className',
                     value: function className() {
@@ -581,7 +584,8 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                     value: function onready() {
                         var _this2 = this;
 
-                        if (m.route().includes('/t/') || this.geotags.length > 1) {
+                        this.geotags = this.props.geotags;
+                        if (m.route().includes('/t/') || this.geotags.length > 1 || typeof InstallTrigger !== 'undefined' && this.props.wait !== true || this.props.wait === false) {
                             $('#modal').on('shown.bs.modal', function () {
                                 _this2.loadMap();
                             });

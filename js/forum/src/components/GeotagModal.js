@@ -2,7 +2,6 @@ import Modal from 'flarum/components/Modal';
 
 export default class GeotagModal extends Modal {
     init() {
-        this.geotags = this.props.geotags;
     }
 
     className() {
@@ -14,7 +13,8 @@ export default class GeotagModal extends Modal {
     }
 
     onready() {
-        if (m.route().includes('/t/') || this.geotags.length > 1) {
+        this.geotags = this.props.geotags;
+        if (m.route().includes('/t/') || this.geotags.length > 1 || (typeof InstallTrigger !== 'undefined' && this.props.wait !== true) || this.props.wait === false) {
             $('#modal').on('shown.bs.modal', () => {
                 this.loadMap()
             })

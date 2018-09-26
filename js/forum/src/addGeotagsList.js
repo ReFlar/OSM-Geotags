@@ -48,7 +48,7 @@ export default function () {
                             href: '#',
                             onclick: function (e) {
                                 e.preventDefault();
-                                app.modal.show(new GeotagModal({geotags: [geotag]}));
+                                app.modal.show(new GeotagModal({geotags: [geotag], wait: false}));
                             }
                         }, geotag.lat() + '°, ' + geotag.lng() + '°')
                     ];

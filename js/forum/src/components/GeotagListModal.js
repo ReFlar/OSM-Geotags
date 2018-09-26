@@ -32,7 +32,7 @@ export default class GeotagListModal extends Modal {
                                 onclick: function (e) {
                                     e.preventDefault();
                                     parent.hide();
-                                    app.modal.show(new GeotagModal({geotags: [parent.geotag]}));
+                                    app.modal.show(new GeotagModal({geotags: [parent.geotag], wait: true}));
                                 }
                             }, this.geotag.lat() + '°, ' + this.geotag.lng() + '°'),
                             Button.component({
