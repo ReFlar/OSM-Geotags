@@ -439,6 +439,7 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                     value: function onsubmit(e) {
                         e.preventDefault();
                         if (this.loading) return;
+                        this.map.setLocation(this.geotagData.lat(), this.geotagData.lng());
                         this.loading = true;
 
                         this.geotag.pushAttributes({

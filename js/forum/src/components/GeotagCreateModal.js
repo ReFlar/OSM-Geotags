@@ -131,6 +131,7 @@ export default class GeotagCreateModal extends Modal {
     onsubmit(e) {
         e.preventDefault();
         if (this.loading) return;
+        this.map.setLocation(this.geotagData.lat(), this.geotagData.lng())
         this.loading = true;
 
         this.geotag.pushAttributes({
