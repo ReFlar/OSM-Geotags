@@ -35,8 +35,11 @@ class AddGeotagsApi
      */
     public function prepareApiAttributes(PrepareApiAttributes $event)
     {
+        $settings = app()->make(SettingsRepositoryInterface::class);
         if ($event->isSerializer(ForumSerializer::class)) {
             $event->attributes['canAddGeotags'] = $event->actor->can('reflar.geotags.create');
+            $event->attributes['defaultLat'] = $settings->get('reflar.geotags-default-lat');
+            $event->attributes['defaultLong'] = $settings->get('reflar.geotags-default-long');
         }
     }
 }

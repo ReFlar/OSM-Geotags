@@ -2,9 +2,10 @@ reflar-geotags:
     admin:
         permissions:
             add_geotags_label: Add geotags
-        settings:
+        modal:
             modal_title: Geotags Settings
-            api_label: Google Maps Api-key
+            lat: Default Latitude
+            long: Default Longitude
 
     forum:
         create_modal:
