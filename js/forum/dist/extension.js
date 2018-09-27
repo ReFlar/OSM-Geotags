@@ -289,11 +289,14 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                         this.textAreaObj = this.props.textAreaObj;
                         this.loading = false;
 
+                        this.defaultLat = app.forum.data.attributes.defaultLat || 38.8977;
+                        this.defaultLong = app.forum.data.attributes.defaultLong || -77.0365;
+
                         this.map = null;
 
                         this.geotagData = {
-                            lat: m.prop(38.8977),
-                            lng: m.prop(-77.0365)
+                            lat: m.prop(this.defaultLat),
+                            lng: m.prop(this.defaultLong)
                         };
 
                         this.geotag = app.store.createRecord('geotags');
@@ -311,7 +314,7 @@ System.register('reflar/geotags/components/GeotagCreateModal', ['flarum/app', 'f
                 }, {
                     key: 'onhide',
                     value: function onhide() {
-                        this.map.setLocation(38.8977, -77.0365);
+                        this.map.setLocation(this.defaultLat, this.defaultLong);
                     }
                 }, {
                     key: 'onready',
@@ -624,7 +627,7 @@ System.register('reflar/geotags/components/GeotagModal', ['flarum/components/Mod
                         this.geotags.map(function (geotag) {
                             var color = 'D94B43';
                             var icon = 'fa-circle';
-                            if (app.session.user.id() == geotag.userId()) {
+                            if (app.session.user && app.session.user.id() == geotag.userId()) {
                                 icon = 'fa-star';
                             }
                             if (geotag.markerColor()) {

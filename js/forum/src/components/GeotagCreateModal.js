@@ -8,12 +8,14 @@ export default class GeotagCreateModal extends Modal {
         this.textAreaObj = this.props.textAreaObj;
         this.loading = false;
 
+        this.defaultLat = app.forum.data.attributes.defaultLat || 38.8977;
+        this.defaultLong = app.forum.data.attributes.defaultLong || -77.0365;
 
         this.map = null;
 
         this.geotagData = {
-            lat: m.prop(38.8977),
-            lng: m.prop(-77.0365)
+            lat: m.prop(this.defaultLat),
+            lng: m.prop(this.defaultLong)
         };
 
         this.geotag = app.store.createRecord('geotags');
@@ -28,7 +30,7 @@ export default class GeotagCreateModal extends Modal {
     }
 
     onhide() {
-        this.map.setLocation(38.8977, -77.0365)
+        this.map.setLocation(this.defaultLat, this.defaultLong)
     }
 
     onready() {

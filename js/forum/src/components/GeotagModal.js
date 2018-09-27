@@ -54,7 +54,7 @@ export default class GeotagModal extends Modal {
         this.geotags.map(geotag => {
             var color = 'D94B43';
             var icon = 'fa-circle';
-            if (app.session.user.id() == geotag.userId()) {
+            if (app.session.user && app.session.user.id() == geotag.userId()) {
                 icon = 'fa-star';
             }
             if (geotag.markerColor()) {
